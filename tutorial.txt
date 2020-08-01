@@ -1,0 +1,40 @@
+1) download needed linux core (http://vault.centos.org/8.1.1911/BaseOS/Source/SPackages/ ???)
+2) extract archieve with linux kernel source (rpm2cpio kernel-4.18.0-147.8.1.el8_1.src.rpm | cpio -id)
+3) Now let's get sources (tar xf linux-4.18.0-147.8.1.el8_1.tar.xz)
+4) You need few tools from "Development tools" so let's download "sudo dnf group install 'Development tools'"
+5) Run "make ARCH=um oldconfig" and enable this options
+	In UML-specific Options:
+	  -64-bit kernel
+	  -Host filesystem
+	In Networking support (enable this to get sub-options):
+	  -Networking options:
+	    -TCP/IP Networking
+	UML Network devices:
+	  -Virtual network device (enable this to get sub-options):
+	    -SLiRP transport
+6) open file: kernel/cpu.c and delete "#ifdef ..." in the line 59 and also relevant "#endif"
+7) go to main??? directory and run "make ARCH=um -j(%num of available processors that you want to engage)"
+8) Now you need slirp binnary, suitable one is contained in this project: https://github.com/sleirsgoevy/heroku-buildpack-uml.git
+9) Move slirp to UML ???
+10) Now you need to get CentOS filesystem for that first run: "sudo dnf install podman-docker"
+11) Run "docker pull centos:8.1.1911" "docker run -it --name test centos:8.1.1911"
+12) Let's copy FS from docker (docker cp test:/ANYTHING .)
+13) Download busybox binnary file https://www.busybox.net/downloads/binaries/1.31.0-defconfig-multiarch-musl
+14) Move busybox and link some files
+	mv busybox-x86_64 ~/Desktop/UML/FS/bin/
+	cd ../Desktop/UML/FS/bin/ - ???
+	ln -n busybox-x86_64 sh
+ 	ln -n busybox-x86_64 ifconfig
+	ln -n busybox-x86_64 route
+15) cd ../..
+16) chown -R kihu FS
+17) chmod -R 0775 FS
+18) cd linux-4.18.0-147.8.1.el8_1
+19) sudo ./linux   root=/dev/root   rootfstype=hostfs   rootflags=$HOME/Desktop/UML/FS   rw   mem=256M   eth0=slirp,,$HOME/Desktop/UML/slirp   init=/bin/sh
+20) To configure - ??? network:
+	mount -t proc proc proc/
+	mount -t sysfs sys sys/
+	ifconfig eth0 10.0.2.14 netmask 255.255.255.240 broadcast 10.0.2.15
+	route add default gw 10.0.2.2
+21) Download special tools "dnf install make/gcc" (problem can appear if it didn't download and you can see this text: "The downloaded packages were saved in cache until the next successful transaction.", go to this dir and rin "rpm -i %package_name")
+
