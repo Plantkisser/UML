@@ -19,6 +19,7 @@
 6) open file: kernel/cpu.c and delete "#ifdef ..." in the line 59 and also relevant "#endif"
 7) go to ~/UML directory and run "make ARCH=um -j(%num of available processors that you want to engage)"
 
+--------------------------------------------------------- here start UML2.sh
 
 8) Now you need slirp binnary, suitable one is contained in this project: https://github.com/sleirsgoevy/heroku-buildpack-uml.git
 9) Move slirp to ~/UML/
@@ -26,7 +27,7 @@
 
 10) Create directory for filesystem: "mkdir ~/UML/FS"
 11) Now you need to get CentOS filesystem for that run: "sudo dnf install podman-docker"
-12) Run "docker pull centos:8.1.1911" "docker run -it --name test centos:8.1.1911"
+12) Run "docker pull centos:8.1.1911" "docker create --name test centos:8.1.1911" 
 13) Let's copy FS from docker (docker cp test:/ANYTHING ~/UML/FS/)
 	docker cp test:/bin ~/UML/FS/
 	docker cp test:/dev ~/UML/FS/
@@ -59,12 +60,16 @@
 16) cd ../..
 17) chown -R $USER ~/UML/FS
 18) chmod -R 0775 ~/UML/FS
-19) cd linux-4.18.0-147.8.1.el8_1
-20) sudo ./linux   root=/dev/root   rootfstype=hostfs   rootflags=$HOME/Desktop/UML/FS   rw   mem=256M   eth0=slirp,,$HOME/Desktop/UML/slirp   init=/bin/sh
+19) cd linux-4.18.0-147.8.1.el8_1 -- you can use UML_strt.sh and skip 20)-21)
+20) sudo ./linux   root=/dev/root   rootfstype=hostfs   rootflags=$HOME/UML/FS   rw   mem=256M   eth0=slirp,,$HOME/UML/slirp   init=/bin/sh
 21) To configure - ??? network:
 	mount -t proc proc proc/
 	mount -t sysfs sys sys/
 	ifconfig eth0 10.0.2.14 netmask 255.255.255.240 broadcast 10.0.2.15
 	route add default gw 10.0.2.2
+
+Also if you don't want to write all these commands you can take init.sh use command: "chmod +x init.sh"
+move it to ~/UML/FS and run UML: "./linux ...same part ... init=init.sh" READ TO AVOID 21 STEP
+
 22) Download special tools "dnf install make/gcc" (problem can appear if it didn't download and you can see this text: "The downloaded packages were saved in cache until the next successful transaction.", go to this dir and run "rpm -i %package_name.rpm")
 
