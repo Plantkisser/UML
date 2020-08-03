@@ -1,7 +1,9 @@
-1) download needed linux core (http://vault.centos.org/8.1.1911/BaseOS/Source/SPackages/ ???)
+1) download needed linux core (http://vault.centos.org/8.1.1911/BaseOS/Source/SPackages/kernel-4.18.0-147.8.1.el8_1.src.rpm)
 2) extract archieve with linux kernel source (rpm2cpio kernel-4.18.0-147.8.1.el8_1.src.rpm | cpio -id)
 3) Now let's get sources (tar xf linux-4.18.0-147.8.1.el8_1.tar.xz)
-4) You need few tools from "Development tools" so let's download "sudo dnf group install 'Development tools'"
+4) You need few tools from "Development tools" so let's download "sudo dnf group install 'Development tools'" and also you need to get tini: 
+	wget -O tini https://github.com/krallin/tini/releases/download/v0.18.0/tini-static
+	chmod +x tini
 5) Run "make ARCH=um oldconfig" and enable this options
 	In UML-specific Options:
 	  -64-bit kernel
@@ -12,29 +14,57 @@
 	UML Network devices:
 	  -Virtual network device (enable this to get sub-options):
 	    -SLiRP transport
+----------------------------------------------------------here UML1.sh ends
+
 6) open file: kernel/cpu.c and delete "#ifdef ..." in the line 59 and also relevant "#endif"
-7) go to main??? directory and run "make ARCH=um -j(%num of available processors that you want to engage)"
+7) go to ~/UML directory and run "make ARCH=um -j(%num of available processors that you want to engage)"
+
+
 8) Now you need slirp binnary, suitable one is contained in this project: https://github.com/sleirsgoevy/heroku-buildpack-uml.git
-9) Move slirp to UML ???
-10) Now you need to get CentOS filesystem for that first run: "sudo dnf install podman-docker"
-11) Run "docker pull centos:8.1.1911" "docker run -it --name test centos:8.1.1911"
-12) Let's copy FS from docker (docker cp test:/ANYTHING .)
-13) Download busybox binnary file https://www.busybox.net/downloads/binaries/1.31.0-defconfig-multiarch-musl
-14) Move busybox and link some files
-	mv busybox-x86_64 ~/Desktop/UML/FS/bin/
-	cd ../Desktop/UML/FS/bin/ - ???
+9) Move slirp to ~/UML/
+
+
+10) Create directory for filesystem: "mkdir ~/UML/FS"
+11) Now you need to get CentOS filesystem for that run: "sudo dnf install podman-docker"
+12) Run "docker pull centos:8.1.1911" "docker run -it --name test centos:8.1.1911"
+13) Let's copy FS from docker (docker cp test:/ANYTHING ~/UML/FS/)
+	docker cp test:/bin ~/UML/FS/
+	docker cp test:/dev ~/UML/FS/
+	docker cp test:/etc ~/UML/FS/
+	docker cp test:/home ~/UML/FS/
+	docker cp test:/lib ~/UML/FS/
+	docker cp test:/lib64 ~/UML/FS/
+	docker cp test:/lost+found ~/UML/FS/
+	docker cp test:/media ~/UML/FS/
+	docker cp test:/mnt ~/UML/FS/
+	docker cp test:/opt ~/UML/FS/
+	docker cp test:/proc ~/UML/FS/
+	docker cp test:/root ~/UML/FS/
+	docker cp test:/run ~/UML/FS/
+	docker cp test:/sbin ~/UML/FS/
+	docker cp test:/srv ~/UML/FS/
+	docker cp test:/sys ~/UML/FS/
+	docker cp test:/tmp ~/UML/FS/
+	docker cp test:/usr ~/UML/FS/
+	docker cp test:/var ~/UML/FS/
+
+
+14) Download busybox binnary file https://www.busybox.net/downloads/binaries/1.31.0-defconfig-multiarch-musl
+15) Move busybox and link few files
+	mv busybox-x86_64 ~/UMl/FS/bin
+	cd ~/UML/FS/bin/
 	ln -n busybox-x86_64 sh
  	ln -n busybox-x86_64 ifconfig
 	ln -n busybox-x86_64 route
-15) cd ../..
-16) chown -R kihu FS
-17) chmod -R 0775 FS
-18) cd linux-4.18.0-147.8.1.el8_1
-19) sudo ./linux   root=/dev/root   rootfstype=hostfs   rootflags=$HOME/Desktop/UML/FS   rw   mem=256M   eth0=slirp,,$HOME/Desktop/UML/slirp   init=/bin/sh
-20) To configure - ??? network:
+16) cd ../..
+17) chown -R $USER ~/UML/FS
+18) chmod -R 0775 ~/UML/FS
+19) cd linux-4.18.0-147.8.1.el8_1
+20) sudo ./linux   root=/dev/root   rootfstype=hostfs   rootflags=$HOME/Desktop/UML/FS   rw   mem=256M   eth0=slirp,,$HOME/Desktop/UML/slirp   init=/bin/sh
+21) To configure - ??? network:
 	mount -t proc proc proc/
 	mount -t sysfs sys sys/
 	ifconfig eth0 10.0.2.14 netmask 255.255.255.240 broadcast 10.0.2.15
 	route add default gw 10.0.2.2
-21) Download special tools "dnf install make/gcc" (problem can appear if it didn't download and you can see this text: "The downloaded packages were saved in cache until the next successful transaction.", go to this dir and rin "rpm -i %package_name")
+22) Download special tools "dnf install make/gcc" (problem can appear if it didn't download and you can see this text: "The downloaded packages were saved in cache until the next successful transaction.", go to this dir and run "rpm -i %package_name.rpm")
 
