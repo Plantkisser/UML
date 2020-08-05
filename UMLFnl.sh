@@ -1,21 +1,22 @@
 #!/bin/sh
-cd ~
-mkdir UML
-mkdir tmpker
-cd tmpker
+mkdir ~/UML
+cp init.sh ~/UML/
+cp .config ~/UML/
+mkdir ~/tmpker
+cd ~/tmpker
 wget http://vault.centos.org/8.1.1911/BaseOS/Source/SPackages/kernel-4.18.0-147.8.1.el8_1.src.rpm
 rpm2cpio kernel-4.18.0-147.8.1.el8_1.src.rpm | cpio -id
-mv linux-4.18.0-147.8.1.el8_1.tar.xz ../UML
+mv linux-4.18.0-147.8.1.el8_1.tar.xz ~/UML
 cd ..
 rm -R tmpker
-cd UML
+cd ~/UML
 tar xf linux-4.18.0-147.8.1.el8_1.tar.xz
 sudo dnf group install 'Development tools'
-cd linux-4.18.0-147.8.1.el8_1
+cd ~/UML/linux-4.18.0-147.8.1.el8_1
 wget -O tini https://github.com/krallin/tini/releases/download/v0.18.0/tini-static
 chmod +x tini
-make ARCH=um oldconfig
-sed -e '59d' -e '72d' /kernel/cpu.c
+mv ~/UML/.config ~/UML/linux-4.18.0-147.8.1.el8_1
+sed -i -e '59d' -e '72d' ~/UML/linux-4.18.0-147.8.1.el8_1/kernel/cpu.c
 make ARCH=um -j$(nproc)
 
 git clone https://github.com/sleirsgoevy/heroku-buildpack-uml.git
@@ -55,4 +56,4 @@ ln -n busybox-x86_64 ifconfig
 ln -n busybox-x86_64 route
 chown -R $USER ~/UML/FS
 chmod -R 0775 ~/UML/FS
-
+mv ~/UML/init.sh ~/UML/FS
