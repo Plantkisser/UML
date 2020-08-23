@@ -54,6 +54,5 @@ rm -f sh
 ln -n busybox-x86_64 sh
 ln -n busybox-x86_64 ifconfig
 ln -n busybox-x86_64 route
-chown -R $USER ~/UML/FS
 chmod -R 0775 ~/UML/FS
 mv ~/UML/init.sh ~/UML/FS
