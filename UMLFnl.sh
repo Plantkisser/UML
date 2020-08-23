@@ -1,5 +1,6 @@
 #!/bin/sh
 mkdir ~/UML
+chmod +x init.sh
 cp init.sh ~/UML/
 cp .config ~/UML/
 mkdir ~/tmpker
