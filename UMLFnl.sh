@@ -50,7 +50,7 @@ docker cp test:/var ~/UML/FS/
 wget https://www.busybox.net/downloads/binaries/1.31.0-defconfig-multiarch-musl/busybox-x86_64
 mv busybox-x86_64 ~/UML/FS/bin/
 cd ~/UML/FS/bin/
-rm sh
+rm -f sh
 ln -n busybox-x86_64 sh
 ln -n busybox-x86_64 ifconfig
 ln -n busybox-x86_64 route
